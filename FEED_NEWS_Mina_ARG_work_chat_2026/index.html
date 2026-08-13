@@ -1,0 +1,684 @@
+﻿<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FEED NEWS｜即時新聞</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:#f4f5f7;color:#222}
+button,input{font:inherit}
+.top{height:48px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:25px;padding:0 35px;font-size:14px}
+.top .nav-btn{cursor:pointer;user-select:none}
+.top .on{color:#6d2cff;font-weight:700}
+.top .fill{flex:1}
+.head{background:#fff;padding:18px 42px 12px;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:20}
+.headrow{display:flex;align-items:center;gap:30px}
+.logo{font-size:32px;font-weight:900;color:#6d2cff;white-space:nowrap;cursor:pointer;user-select:none}
+.logo span{color:#222}
+.logo small{color:#222;font-size:15px;margin-left:5px}
+.search{height:52px;display:flex;flex:1;max-width:820px;background:#f0f2f5;border:1px solid #e1e3e7;border-radius:28px;overflow:hidden}
+.search input{flex:1;border:0;outline:0;background:transparent;padding:0 23px;font-size:17px}
+.search button{width:78px;border:0;background:#6d2cff;color:white;font-size:24px;cursor:pointer}
+.login{border:1px solid #ddd;border-radius:22px;background:white;padding:9px 20px;cursor:pointer;transition:0.2s}
+.login:hover{background:#6d2cff;color:#fff;border-color:#6d2cff}
+.break{background:#fff;border-bottom:1px solid #ddd;padding:8px 42px}
+.breakin{max-width:1360px;margin:auto}
+.tag{background:#d40000;color:#fff;padding:5px 9px;margin-right:10px;font-size:13px;font-weight:bold}
+.hero{max-width:1360px;margin:22px auto;padding:0 24px}
+.heroin{display:grid;grid-template-columns:1.7fr 1fr;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 5px #0001}
+.hero img{width:100%;height:380px;object-fit:cover}
+.herotxt{padding:32px;display:flex;flex-direction:column;justify-content:center}
+.cat{color:#d40000;font-size:13px;font-weight:bold;margin-bottom:8px}
+.herotxt h1{font-size:34px;line-height:1.35;margin:0 0 15px}
+.herotxt p,.card p,.result p{color:#666;line-height:1.75}
+.meta{color:#999;font-size:12px;margin-top:15px}
+.layout{max-width:1360px;margin:22px auto;padding:0 24px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px}
+.title{border-left:5px solid #6d2cff;padding-left:12px;font-size:22px;margin:0 0 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 1px 5px #0001;cursor:pointer;transition:.2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 5px 15px #0002}
+.card img{display:block;width:100%;height:205px;object-fit:cover}
+.cardbody{padding:18px}
+.card h3{font-size:19px;line-height:1.45;margin:0 0 7px}
+.sidebox,.ad{background:#fff;border-radius:6px;box-shadow:0 1px 5px #0001;margin-bottom:18px;overflow:hidden}
+.sidebox{padding:20px}
+.sidebox h3{margin:0 0 10px}
+.rank{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid #eee;cursor:pointer;line-height:1.4}
+.num{color:#d40000;font-weight:900;font-size:20px;min-width:23px}
+.ad img{width:100%;height:185px;object-fit:cover;display:block}
+.adtext{padding:13px}
+.adtext small{color:#999}
+.searchpage{grid-column:1/-1;background:#fff;border-radius:6px;padding:30px;box-shadow:0 1px 5px #0001}
+.result{padding:18px 0;border-bottom:1px solid #eee;cursor:pointer}
+.result h3{margin:5px 0;font-size:20px}
+.resultmeta{color:#999;font-size:12px}
+.empty{text-align:center;padding:60px;color:#888}
+.secret{background:#111;color:#eee;padding:40px;text-align:center;border-radius:5px;min-height:320px}
+.secret p{color:#aaa;line-height:2}
+.suggest{background:#f3f3f3;padding:14px;margin-top:20px;color:#777}
+.suggest b{color:#222;cursor:pointer}
+footer{background:#252525;color:#aaa;padding:35px 42px;margin-top:35px;font-size:13px}
+.overlay{display:none;position:fixed;inset:0;background:#000c;z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal{width:min(900px,95vw);max-height:88vh;overflow:auto;background:#fff;border-radius:8px;position:relative}
+.modal.dark{background:#0a0a0a;color:#ddd}
+.close{position:absolute;right:14px;top:8px;border:0;background:none;font-size:30px;color:#777;cursor:pointer;z-index:10}
+.modal.dark .close{color:#aaa}
+.mh{padding:30px 34px 10px}
+.mh h2{font-size:30px;line-height:1.4;margin:0}
+.mc{padding:15px 34px 30px;line-height:2}
+.comments{border-top:1px solid #eee;padding:20px 34px 30px}
+.comment{background:#f8f9fa;padding:12px 16px;margin:10px 0;border-radius:6px;border-left:3px solid #6d2cff}
+.comment.clue{border-left-color:#d40000;background:#fff0f0}
+.comment b{color:#333;font-size:14px}
+.comment p{margin:6px 0 0;color:#555;font-size:14px;line-height:1.5}
+.story-img{width:100%;max-height:380px;object-fit:cover;border-radius:6px;margin:15px 0;border:1px solid #333}
+.login-box{padding:40px 30px;max-width:400px;margin:auto;text-align:center}
+.login-box h2{margin-bottom:20px;font-size:24px}
+.input-group{margin-bottom:18px;text-align:left}
+.input-group label{display:block;margin-bottom:6px;font-size:14px;color:#666}
+.input-group input{width:100%;padding:12px;border:1px solid #ccc;border-radius:6px;outline:none}
+.login-btn{width:100%;padding:12px;background:#6d2cff;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold}
+.login-btn:hover{background:#581cd8}
+.btn-to-login{display:inline-block;margin-top:20px;padding:12px 28px;background:#d40000;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;font-weight:bold}
+
+/* Threads 模擬樣式 */
+.threads-modal{background:#101010;color:#f3f5f7;width:min(640px,95vw);border-radius:16px;overflow:hidden;border:1px solid #262626}
+.t-header{padding:24px 24px 16px;border-bottom:1px solid #262626}
+.t-profile{display:flex;justify-content:space-between;align-items:flex-start}
+.t-avatar{width:75px;height:75px;border-radius:50%;object-fit:cover;border:2px solid #333}
+.t-names h1{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:6px}
+.t-badge{background:#262626;color:#8e8e8e;font-size:11px;padding:2px 8px;border-radius:12px;font-weight:normal}
+.t-handle{color:#777;font-size:14px;margin-bottom:12px}
+.t-bio{font-size:14px;line-height:1.6;color:#ccc;margin-bottom:12px}
+.t-meta{font-size:13px;color:#666}
+.t-post{padding:20px 24px;border-bottom:1px solid #202020;display:flex;gap:14px}
+.t-p-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover}
+.t-p-content{flex:1}
+.t-p-user{font-weight:bold;font-size:14px;color:#fff;display:flex;justify-content:space-between}
+.t-p-time{color:#666;font-weight:normal;font-size:12px}
+.t-p-text{margin:8px 0 12px;font-size:14px;line-height:1.6;color:#ddd;white-space:pre-wrap}
+.t-p-img{width:100%;max-height:350px;object-fit:cover;border-radius:10px;margin-top:8px;border:1px solid #262626}
+.t-actions{display:flex;gap:16px;color:#777;font-size:18px;margin-top:10px}
+
+.toast{position:fixed;right:20px;bottom:20px;background:#111;color:#fff;padding:12px 17px;border-radius:5px;opacity:0;transition:.3s;z-index:200}
+.toast.show{opacity:1}
+.corrupt .logo{animation:glitch 1.7s infinite}
+@keyframes glitch{90%{transform:translateX(2px)}92%{transform:translateX(-2px)}94%{transform:none}}
+@media(max-width:900px){.top{overflow:hidden;gap:12px;padding:0 14px}.head{padding:14px}.headrow{flex-wrap:wrap}.search{order:3;flex-basis:100%}.heroin{grid-template-columns:1fr}.hero img{height:250px}.layout{grid-template-columns:1fr;padding:0 14px}.grid{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:14px}.herotxt{padding:24px}.herotxt h1{font-size:27px}}
+@media(max-width:600px){.side{display:block}.hero{padding:0 14px}.top span:nth-child(n+6){display:none}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="nav-btn" onclick="goHome()">⌂ 首頁</span><span class="on">▣ 新聞</span><span>▰ 股市</span><span>● 運動</span><span>TV</span><span>汽機車</span><span>購物中心</span><span class="fill"></span><span>即時</span>
+</div>
+
+<header class="head">
+  <div class="headrow">
+    <div class="logo" id="logo" onclick="goHome()">FEED<span>NEWS</span><small>新聞</small></div>
+    <div class="search">
+      <input id="searchInput" placeholder="新聞搜尋">
+      <button onclick="searchNews()">⌕</button>
+    </div>
+    <button class="login" onclick="openLogin()">登入</button>
+  </div>
+</header>
+
+<div class="break">
+  <div class="breakin">
+    <span class="tag">快訊</span>
+    <span id="breaktext">多起社群事件持續受到關注 相關單位表示將持續調查</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="heroin">
+    <img src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1400&q=85" alt="演唱會">
+    <div class="herotxt">
+      <div class="cat">娛樂／焦點</div>
+      <h1>一朵向日葵，為何演變成全民獵巫？</h1>
+      <p>一場演唱會上的互動被大量轉載，從粉絲爭議一路延燒至匿名論壇。沒有人注意到，最初流出的照片裡，那朵向日葵似乎出現在不只一個地方。</p>
+      <div class="meta">2026-08-08 ｜ 瀏覽 128,402 次</div>
+    </div>
+  </div>
+</section>
+
+<div class="layout">
+  <main id="main">
+    <h2 class="title">熱門新聞</h2>
+    <div class="grid">
+      <article class="card" onclick="openArticle('idol')">
+        <img src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=85">
+        <div class="cardbody">
+          <div class="cat">娛樂</div>
+          <h3>偶像直播談「界線感」 粉絲圈再掀論戰</h3>
+          <p>直播片段在短時間內大量轉載，不同立場的網友開始激烈爭論。</p>
+          <div class="meta">2026-08-08 18:42</div>
+        </div>
+      </article>
+      <article class="card" onclick="openArticle('oil')">
+        <img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=85">
+        <div class="cardbody">
+          <div class="cat">生活／食品安全</div>
+          <h3>食用油回收擴大 多家業者自主下架</h3>
+          <p>主管機關持續追蹤產品流向，提醒民眾依公告批號辦理退換貨。</p>
+          <div class="meta">2026-08-09 10:17</div>
+        </div>
+      </article>
+      <article class="card" onclick="openArticle('smoke')">
+        <img src="https://images.unsplash.com/photo-1517999144091-3d9dca6d1d9b?auto=format&fit=crop&w=900&q=85">
+        <div class="cardbody">
+          <div class="cat">社會</div>
+          <h3>警方查獲非法煙彈 提醒勿購買來路不明產品</h3>
+          <p>近期查獲多起案件，警方提醒民眾提高警覺。</p>
+          <div class="meta">2026-08-09 21:03</div>
+        </div>
+      </article>
+      <article class="card" onclick="openArticle('ai')">
+        <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=900&q=85">
+        <div class="cardbody">
+          <div class="cat">科技</div>
+          <h3>AI 搜尋工具推出全新功能</h3>
+          <p>新版搜尋系統加入更多互動功能，引發科技圈討論。</p>
+          <div class="meta">2026-08-10 09:30</div>
+        </div>
+      </article>
+      <article class="card" onclick="openArticle('weather')">
+        <img src="https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=85">
+        <div class="cardbody">
+          <div class="cat">生活／天氣</div>
+          <h3>北部午後雷陣雨 氣象署發布提醒</h3>
+          <p>午後局部地區可能出現短延時強降雨。</p>
+          <div class="meta">2026-08-10 12:05</div>
+        </div>
+      </article>
+      <article class="card" onclick="openArticle('travel')">
+        <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=85">
+        <div class="cardbody">
+          <div class="cat">國際／旅遊</div>
+          <h3>旅遊旺季來臨 多家航空推出優惠</h3>
+          <p>暑假旅遊需求增加，航空公司陸續推出限時折扣。</p>
+          <div class="meta">2026-08-10 14:20</div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <aside class="side">
+    <div class="sidebox">
+      <h3>🔥 熱門排行</h3>
+      <div class="rank" onclick="openArticle('hero')"><span class="num">1</span><span>一朵向日葵，為何演變成全民獵巫？</span></div>
+      <div class="rank" onclick="openArticle('oil')"><span class="num">2</span><span>食用油回收擴大 多家業者自主下架</span></div>
+      <div class="rank" onclick="openArticle('smoke')"><span class="num">3</span><span>警方查獲非法煙彈案件增加</span></div>
+      <div class="rank"><span class="num">4</span><span>AI 搜尋工具推出新功能</span></div>
+      <div class="rank"><span class="num">5</span><span>北部午後雷陣雨</span></div>
+    </div>
+    <div class="ad"><img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=700&q=80"><div class="adtext"><small>廣告</small><br><b>夏日旅遊優惠</b><br>限定航線早鳥方案，立即查看。</div></div>
+    <div class="ad"><img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=700&q=80"><div class="adtext"><small>廣告</small><br><b>年度健康檢查</b><br>守護日常健康，了解更多資訊。</div></div>
+  </aside>
+</div>
+
+<footer>
+  <b style="color:white;font-size:22px">FEED NEWS</b><br><br>
+  本網站為虛構互動解謎遊戲介面。人物、事件、機構與文章皆為遊戲創作內容，並非真實新聞報導。<br>© 2026 FEED NEWS Fictional ARG Project.
+</footer>
+
+<!-- 一般文章彈窗 -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeArticle()">
+  <div class="modal">
+    <button class="close" onclick="closeArticle()">×</button>
+    <div class="mh">
+      <div class="cat" id="mcat"></div>
+      <h2 id="mtitle"></h2>
+      <div class="meta" id="mdate"></div>
+    </div>
+    <div class="mc" id="mtext"></div>
+    <div class="comments">
+      <h3>網友留言</h3>
+      <div id="comments"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 【觀看】故事彈窗 -->
+<div class="overlay" id="storyOverlay" onclick="if(event.target===this)closeStory()">
+  <div class="modal dark">
+    <button class="close" onclick="closeStory()">×</button>
+    <div class="mh">
+      <div class="cat" style="color:#ff3333">⚠️ 警語：未知權限紀錄檔</div>
+      <h2>【真相】：向日葵事件</h2>
+      <div class="meta" style="color:#666">紀錄時間：2026-08-13</div>
+    </div>
+    <div class="mc">
+      <p style="white-space: pre-wrap; font-size: 15px; color:#ccc; line-height:1.8;" id="storyText"></p>
+      <img class="story-img" src="https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=1000&q=80" alt="向日葵種子全變成黑色瞳孔">
+      <div style="text-align: center; margin-top: 25px; padding-bottom: 20px;">
+        <button class="btn-to-login" onclick="closeStory(); openLogin();">🔑 進入【系統登入】頁面</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 登入頁面 Modal -->
+<div class="overlay" id="loginOverlay" onclick="if(event.target===this)closeLogin()">
+  <div class="modal">
+    <button class="close" onclick="closeLogin()">×</button>
+    <div class="login-box">
+      <h2>系統登入</h2>
+      <p style="color:#777; font-size:13px; margin-bottom:20px;">請輸入受害者 Mina 或管理員帳號密碼</p>
+      <form onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label>帳號 (Account)</label>
+          <input type="text" id="username" placeholder="輸入帳號..." required>
+        </div>
+        <div class="input-group">
+          <label>密碼 (Password)</label>
+          <input type="password" id="password" placeholder="輸入密碼..." required>
+        </div>
+        <button type="submit" class="login-btn">驗證登入</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Mina 的私人 Threads Modal -->
+<div class="overlay" id="threadsOverlay" onclick="if(event.target===this)closeThreads()">
+  <div class="threads-modal modal">
+    <button class="close" onclick="closeThreads()" style="color:#888;">×</button>
+    
+    <div class="t-header">
+      <div class="t-profile">
+        <div>
+          <div class="t-names">
+            <h1>Mina 🌸 <span class="t-badge">🔒 不公開帳號</span></h1>
+          </div>
+          <div class="t-handle">@mina_1999_official</div>
+        </div>
+        <img class="t-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80" alt="Mina的大頭貼">
+      </div>
+      <div class="t-bio">
+        NTU 22y 📍信義區<br>
+        「如果家不是避風港，那舞台就是唯一的救贖。」<br>
+        🎧 NCT / Helios 🌻
+      </div>
+      <div class="t-meta">1.2k 追蹤者 ｜ 僅限預估好友可見</div>
+    </div>
+
+    <div class="t-posts">
+      
+      <!-- Post 1: 近期恐怖事件/追星失敗心聲 -->
+      <div class="t-post">
+        <img class="t-p-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80">
+        <div class="t-p-content">
+          <div class="t-p-user">Mina <span class="t-p-time">2天前</span></div>
+          <div class="t-p-text">網路上那些人到底懂什麼…？
+我花了自己的錢買前排票，只是想親手把花遞給他。我爸媽從小每天只會在家吵架算計財產，家裡冷冰冰的，這幾年只有看演唱會時我覺得自己是活著的。
+那天我只是拿著向日葵而已，為什麼大家都要罵我？
+更可怕的是…這幾天凌晨三點，信義區家裡的門口，好像真的有怪聲音。我不敢開門…那朵花明明已經丟掉了啊……😭</div>
+          <img class="t-p-img" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80">
+          <div class="t-actions"><span>♡ 12</span> <span>💬 3</span> <span>🔁 1</span></div>
+        </div>
+      </div>
+
+      <!-- Post 2: 與閨蜜的合照/日常 -->
+      <div class="t-post">
+        <img class="t-p-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80">
+        <div class="t-p-content">
+          <div class="t-p-user">Mina <span class="t-p-time">2026年7月28日</span></div>
+          <div class="t-p-text">和最愛的大學閨蜜去吃信義區早午餐 ✨
+感謝妳總是聽我抱怨家裡的爛事，只有妳懂我為了搶前排票花了多少心力！演唱會倒數，好期待見到我最愛的太陽 🌻☀️</div>
+          <img class="t-p-img" src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80">
+          <div class="t-actions"><span>♡ 45</span> <span>💬 8</span></div>
+        </div>
+      </div>
+
+      <!-- Post 3: 台大日常 -->
+      <div class="t-post">
+        <img class="t-p-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80">
+        <div class="t-p-content">
+          <div class="t-p-user">Mina <span class="t-p-time">2026年5月14日</span></div>
+          <div class="t-p-text">台大總圖摸魚中 📖
+爸媽今天又打電話來叫我選邊站，煩死了，財產怎麼分關我什麼事。
+還不如在圖書館戴耳機刷偶像的歌…音樂才是真的。</div>
+          <img class="t-p-img" src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80">
+          <div class="t-actions"><span>♡ 32</span> <span>💬 4</span></div>
+        </div>
+      </div>
+
+      <!-- Post 4: 回憶高中到大學追星歲月 -->
+      <div class="t-post">
+        <img class="t-p-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80">
+        <div class="t-p-content">
+          <div class="t-p-user">Mina <span class="t-p-time">2025年11月03日</span></div>
+          <div class="t-p-text">整理房間翻到高中時期的專輯和小卡 😭
+從那時候爸媽分居開始，我就每天晚上戴著耳機循環他們的歌才能睡著。
+轉眼間都22歲、快從台大畢業了，謝謝你陪我度過每一個崩潰的夜晚 💚</div>
+          <img class="t-p-img" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80">
+          <div class="t-actions"><span>♡ 68</span> <span>💬 12</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let initialMainHTML = '';
+
+window.addEventListener('DOMContentLoaded', () => {
+  initialMainHTML = document.getElementById('main').innerHTML;
+});
+
+function goHome(){
+  if(initialMainHTML){
+    document.getElementById('main').innerHTML = initialMainHTML;
+  }
+  let side = document.querySelector('.side');
+  if(side) side.style.display = '';
+  document.getElementById('searchInput').value = '';
+  scrollTo(0,0);
+}
+
+const A={
+  hero:{title:"一朵向日葵，為何演變成全民獵巫？",cat:"娛樂／焦點",date:"2026-08-08 16:21",text:`一場演唱會上的短暫互動，在社群平台上迅速擴散。\n\n起初，討論只是圍繞一名粉絲遞出向日葵的畫面。數小時後，事件開始出現不同版本的說法。\n\n有網友指出，照片中的花束似乎與另一場活動出現的花束完全相同。`},
+  idol:{title:"偶像直播談「界線感」 粉絲圈再掀論戰",cat:"娛樂",date:"2026-08-08 18:42",text:`一段直播內容被大量轉載後，引起粉絲社群討論。\n\n部分網友注意到直播背景角落曾短暫出現一朵向日葵。直播結束後，原始片段數度被重新上傳又刪除。`},
+  oil:{title:"食用油回收擴大 多家業者自主下架",cat:"生活／食品安全",date:"2026-08-09 10:17",text:`主管機關表示，目前持續追蹤相關產品流向。\n\n部分業者已主動暫停販售並進行庫存清查。\n\n有網友注意到其中一張照片的背景，似乎與一篇多年前的工廠新聞相同。`},
+  smoke:{title:"警方查獲非法煙彈 提醒勿購買來路不明產品",cat:"社會",date:"2026-08-09 21:03",text:`警方近期查獲多起來源不明的煙彈案件。\n\n警方提醒民眾不要購買或接觸來源不明的產品。\n\n匿名論壇開始將本案與數年前一處廢棄工廠的傳聞連結，但目前沒有證據證明兩者相關。`},
+  ai:{title:"AI 搜尋工具推出全新功能",cat:"科技",date:"2026-08-10 09:30",text:`新版搜尋工具加入更多互動功能。\n\n有使用者發現部分系統會記住過去的搜尋詞。`},
+  weather:{title:"北部午後雷陣雨 氣象署發布提醒",cat:"生活／天氣",date:"2026-08-10 12:05",text:`今日午後局部地區可能出現短延時強降雨。\n\n氣象單位提醒民眾留意雷雨胞發展。`},
+  travel:{title:"旅遊旺季來臨 多家航空推出優惠",cat:"國際／旅遊",date:"2026-08-10 14:20",text:`暑假旅遊需求增加，航空公司陸續推出限時優惠。`},
+  'flower-market':{title:"花卉批發市場近期向日葵需求異常增加",cat:"生活",date:"2026-08-10",text:`業者表示，近期向日葵需求突然增加，但原因仍不明。`},
+  factory:{title:"某工廠地下儲油槽遭封鎖",cat:"社會",date:"2023-04-17",text:`一處廢棄工廠地下設施遭封鎖，相關單位未說明具體原因。`},
+  'smoke-old':{title:"不明煙霧造成多人短暫失去方向感",cat:"社會",date:"2024-11-03",text:`附近居民表示，當晚曾聞到特殊氣味。`},
+  trade:{title:"花卉市場異常交易紀錄",cat:"資料庫",date:"2025-03-21",text:`部分交易紀錄與一般市場價格存在異常差異。`},
+  'r013-lock':{title:"地下儲油槽封鎖紀錄",cat:"資料庫",date:"2023-04-17",text:`案件編號：R-013。`},
+  r013:{title:"R-013：關於「根部」的內部報告",cat:"檔案",date:"2023-04-18",text:`文件部分內容遭到刪除。僅留下：「不要讓它接觸光。」`},
+  root:{title:"根部生長異常案例增加",cat:"即時",date:"2026-08-13",text:`目前尚無相關單位願意對此事件發表評論。`}
+};
+
+const D=[
+  ['hero',['向日葵','粉絲','演唱會','偶像','花']],
+  ['idol',['偶像','粉絲','直播','界線','演唱會']],
+  ['oil',['油','食用油','回收','食品']],
+  ['smoke',['煙彈','電子煙','警方','查緝','煙','煙霧']],
+  ['ai',['AI','人工智慧','搜尋','科技']],
+  ['weather',['雨','豪雨','天氣','氣象']],
+  ['travel',['旅遊','航空','飛機','優惠']],
+  ['flower-market',['向日葵','花卉','批發市場']],
+  ['factory',['工廠','地下','儲油槽','油']],
+  ['smoke-old',['煙','煙霧','工廠']],
+  ['trade',['花卉','交易']],
+  ['r013-lock',['地下儲油槽','儲油槽','封鎖']],
+  ['r013',['R-013','根部','內部報告']],
+  ['root',['根部','根','生長異常']]
+];
+
+const secret={
+  餵養:['你是不是想搜尋：「餵養它」？','搜尋紀錄已被保存。'],
+  餵養它:['搜尋結果：1 筆','每一次點擊，都在餵養它。'],
+  觀看:['《觀看本身是否會造成影響？》','謝謝你的觀看。'],
+  它:['搜尋結果：沒有相關新聞','但它知道你在找它。']
+};
+
+const storyContent = `在那場演唱會之前，沒有人知道「向日葵」會害死人。
+有一種說法是，向日葵會永遠追著太陽。
+但在「赫利俄斯」演唱會上，那朵向日葵，卻一直望著第五排的女孩。
+女孩叫做 Mina。
+她抱著一束假的向日葵。
+她沒有尖叫，也沒有哭，只是在安可時，把其中一朵舉起來，希望工作人員能替她交給舞台中央的偶像──黎。
+旁邊的成員笑著接過花，朝黎遞去。
+黎只是看了一眼。
+然後，慢慢把臉轉開。
+那朵花最後落回舞台，靜靜躺著。
+整場演唱會沒有任何人發現異常。
+除了 Mina。
+她說，那朵向日葵的花盤，在黎轉頭的瞬間，也跟著轉了九十度。
+不是朝向黎。
+而是朝向她。
+
+第二天開始，網路出現一個匿名論壇。
+標題只有一句：
+「那個拿向日葵的人，是誰？」
+沒有人知道第一張照片是誰拍的。
+照片裡，Mina 的臉被紅圈圈起。
+留言一則接著一則。
+「就是她。」
+「好噁心。」
+「把自己當女主角。」
+「滾出粉圈。」
+一開始只有幾十則。
+下午變成幾千則。
+晚上，論壇忽然更新了一個新功能。
+每一篇留言，都會自動在尾端長出一朵🌻。
+有人覺得只是網站彩蛋。
+直到有人發現，那朵花的方向，會改變。
+它永遠朝向被攻擊的人。
+
+Mina 開始收到照片。
+不是別人寄的。
+是她自己的手機，每天凌晨三點，自動拍攝。
+第一天，她睡著。
+第二天，她依然睡著。
+第三天……
+她發現照片裡，多了一個人。
+站在床邊。
+那人抱著一大束向日葵。
+臉，被花完全遮住。
+
+論壇越來越熱鬧。
+每多一百則留言，花就多開一瓣。
+有人開始比賽誰罵得更狠。
+因為只要留言按讚數夠高，自己的帳號旁，就會長出一朵金色向日葵。
+粉絲們開始瘋狂收集。
+有人一天發三百則。
+有人甚至不睡覺。
+他們發現，只要一直罵，就會有更多人一起罵。
+像植物會自己繁殖一樣。
+
+直到第四天。
+有人注意到。
+那些金色向日葵，不知什麼時候，全都變成了眼睛。
+每一片花瓣，都是眼皮。
+每一顆葵花籽，都是黑色瞳孔。
+它們沒有看向 Mina。
+它們開始看向留言的人。
+
+第一個失蹤的是論壇版主。
+第二個，是發了七千多則留言的帳號。
+第三個，是偷拍照片的人。
+警方找到他們的房間。
+所有人都坐在電腦前。
+身體沒有傷口。
+只是頭，不見了。
+取而代之的是一朵盛開的巨大向日葵。
+花盤中央密密麻麻，全是人類的眼睛。
+那些眼睛不停眨動。
+像是在刷新留言。`;
+
+function searches(){try{return JSON.parse(localStorage.getItem('feedSearches')||'[]')}catch(e){return[]}}
+function save(k){let s=searches();if(!s.includes(k)){s.push(k);localStorage.setItem('feedSearches',JSON.stringify(s))}return s}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function unlocked(id){
+  if(['flower-market','trade'].includes(id))return searches().some(x=>['向日葵','花卉'].includes(x));
+  if(id==='r013-lock')return searches().includes('儲油槽');
+  if(id==='r013')return searches().some(x=>['R-013','r-013'].includes(x));
+  if(id==='root')return searches().some(x=>['根','根部','R-013'].includes(x));
+  return true;
+}
+
+function searchNews(){
+  let k=document.getElementById('searchInput').value.trim();
+  if(!k){toast('請輸入搜尋內容');return}
+  save(k);
+  corrupt();
+
+  if(k === '觀看'){
+    showStoryModal();
+    secretPage(k);
+    return;
+  }
+
+  if(secret[k])return secretPage(k);
+
+  let r=D.filter(([id,keys])=>unlocked(id)&&((A[id].title+' '+A[id].cat+' '+keys.join(' ')+' '+A[id].text).toLowerCase().includes(k.toLowerCase())));
+  let html='<div class="searchpage"><h2>搜尋結果</h2><div class="meta">關鍵字：「'+esc(k)+'」 找到 '+r.length+' 筆結果</div>';
+  if(!r.length)html+='<div class="empty"><p style="font-size:18px">沒有找到相關新聞。</p><p>試試「向日葵」、「食用油」、「煙彈」或「AI」。</p></div>';
+  else r.forEach(([id])=>html+='<div class="result" onclick="openArticle(\''+id+'\')"><div class="resultmeta">'+esc(A[id].cat)+' '+esc(A[id].date)+'</div><h3>'+esc(A[id].title)+'</h3><p>'+esc(A[id].text).replace(/\n/g,' ')+'</p></div>');
+
+  if(k==='根'||k==='根部')html+='<div class="suggest">搜尋建議：<b onclick="quick(\'餵養\')">餵養</b></div>';
+  if(k==='餵養')html+='<div class="suggest">搜尋建議：<b onclick="quick(\'餵養它\')">餵養它</b></div>';
+  if(k==='觀看')html+='<div class="suggest">搜尋建議：<b onclick="quick(\'它\')">它</b></div>';
+
+  html+='</div>';
+  document.getElementById('main').innerHTML=html;
+  document.querySelector('.side').style.display='none';
+  scrollTo(0,0);
+}
+
+function quick(k){document.getElementById('searchInput').value=k;searchNews()}
+
+function secretPage(k){
+  let [t,p]=secret[k];
+  let extra=k==='餵養'?'<div class="suggest">搜尋建議：<b onclick="quick(\'餵養它\')">餵養它</b></div>':k==='餵養它'?'<div class="suggest"><b onclick="quick(\'觀看\')">繼續搜尋</b></div>':'';
+  document.getElementById('main').innerHTML='<div class="searchpage"><h2>搜尋結果</h2><div class="meta">關鍵字：「'+esc(k)+'」</div><div class="secret"><h2>'+esc(t)+'</h2><p>'+esc(p)+'</p>'+extra+'</div></div>';
+  document.querySelector('.side').style.display='none';
+  scrollTo(0,0);
+}
+
+function showStoryModal(){
+  document.getElementById('storyText').textContent = storyContent;
+  document.getElementById('storyOverlay').style.display = 'flex';
+}
+
+function closeStory(){
+  document.getElementById('storyOverlay').style.display = 'none';
+}
+
+function openLogin(){
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+
+function closeLogin(){
+  document.getElementById('loginOverlay').style.display = 'none';
+}
+
+function handleLogin(e){
+  e.preventDefault();
+  const u = document.getElementById('username').value;
+  const p = document.getElementById('password').value;
+  if(u === 'Mina1999' && p === 'ilovenct'){window.location.href = "mina_threads.html";
+  } else {
+    alert('帳號或密碼錯誤！');
+  }
+}
+
+function openThreads(){
+  document.getElementById('threadsOverlay').style.display = 'flex';
+}
+
+function closeThreads(){
+  document.getElementById('threadsOverlay').style.display = 'none';
+}
+
+function openArticle(id){
+  let a=A[id];
+  if(!a)return;
+
+  document.getElementById('mcat').textContent=a.cat;
+  document.getElementById('mtitle').textContent=a.title;
+  document.getElementById('mdate').textContent=a.date;
+
+  let text=a.text;
+  if(id==='r013')text+='\n\n【文件狀態：部分內容遭刪除】\n\nR-013\n\n不要讓它接觸光。';
+  if(id==='root')text+='\n\n編輯部註：本篇文章的發布日期為 2026-08-13。';
+  document.getElementById('mtext').innerHTML=esc(text).replace(/\n/g,'<br>');
+
+  /* 多樣化留言池：吐槽、跟風、發牢騷、廣告、無關資訊與ARG線索 */
+  const commonComments=[
+    {name:'吃瓜第一線',text:'這下精彩了，卡一個等懶人包 🍿',clue:false},
+    {name:'信義區打卡王',text:'這新聞標題也太抓馬了吧... 現在記者真好當',clue:false},
+    {name:'明天要考微積分',text:'我好想退學... 為什麼滑新聞也能看到這種煩人的事 😭',clue:false},
+    {name:'二手買賣小幫手',text:'【售】全新未拆 AirPods Pro 二代，意者私訊可面交！',clue:false},
+    {name:'台大管院路過',text:'有人知道今天總圖到底在吵什麼嗎？好像有女生在哭',clue:true},
+    {name:'跟風狗',text:'雖然看不懂，但先跟著罵就對了！',clue:false},
+    {name:'鍵盤律師',text:'這個要是提告的話大概率是不會成立啦，散會！',clue:false},
+    {name:'睡不著的人',text:'最近晚上凌晨三點外面都有奇怪的聲音，只有我聽到嗎…？',clue:true},
+    {name:'追星仔',text:'拿向日葵那個真的太過份了，到底知不知道偶像的界線感在哪啊？',clue:true},
+    {name:'熱心網友',text:'幫高高高高高高刷上去，求真相！',clue:false},
+    {name:'打卡吃早餐',text:'剛吃完歐芙早餐，味道還不錯，推一個芋頭蛋餅。',clue:false},
+    {name:'不想上班',text:'主管又在發瘋了，好想直接離職喔... 到底什麼時候可以退休？',clue:false}
+  ];
+
+  const articleComments={
+    hero:[
+      {name:'花市老闆',text:'我們批發市場最近向日葵真的賣得很誇張，都被奇怪的人買走了…',clue:true},
+      {name:'現場粉絲',text:'我就坐在第五排附近！那個台大女生（Mina）當時臉超白，花盤真的有動！',clue:true},
+      {name:'路人',text:'又是這種獵巫網路暴力，大家收手吧，別逼死人。',clue:false}
+    ],
+    idol:[
+      {name:'愛NCT也愛Helios',text:'直播角落那朵花到底哪來的？原始影片被下架超心虛！',clue:true},
+      {name:'飯圈大嫂',text:'私生飯滾遠一點好嗎？不要騷擾我們家偶像！',clue:false}
+    ],
+    oil:[
+      {name:'食安觀察員',text:'照片背景那座廢棄工廠…是不是幾年前傳出地下儲油槽封鎖的那間？',clue:true}
+    ],
+    smoke:[
+      {name:'社會線記者',text:'聽說這批煙彈吸了會產生幻覺，看到葵花籽變成眼睛…好毛',clue:true}
+    ]
+  };
+
+  let pool=[...commonComments,...(articleComments[id]||[])];
+  const searched=searches();
+
+  if(searched.length>=3){ pool.push({name:'Anonymous_X',text:'你已經搜尋太多次了，它正在紀錄你的 IP。',clue:true}); }
+  if(searched.includes('R-013') || searched.includes('r-013')){ pool.push({name:'deleted_user_013',text:'別再挖 R-013 了，地下儲油槽的事情不能說！',clue:true}); }
+  if(searched.some(x=>['餵養','餵養它'].includes(x))){ pool.push({name:'Sunflower_Watcher',text:'每一次點擊與留言，都是在把眼睛餵養得更巨大。',clue:true}); }
+
+  // 隨機洗牌留言
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+
+  let selected=pool.slice(0, 6);
+  let c=selected.map(comm => 
+    `<div class="comment ${comm.clue ? 'clue' : ''}">
+      <b>${esc(comm.name)}</b>
+      <p>${esc(comm.text)}</p>
+    </div>`
+  ).join('');
+
+  document.getElementById('comments').innerHTML=c;
+  document.getElementById('overlay').style.display='flex';
+}
+
+function closeArticle(){document.getElementById('overlay').style.display='none'}
+
+function corrupt(){
+  let s=searches();
+  if(s.length>=3)document.title='FEED NEWS｜你還在看嗎？';
+  if(s.length>=5){
+    document.body.classList.add('corrupt');
+    document.getElementById('logo').innerHTML='FEED<span>NEWS</span><small>新聞</small> 🌻';
+  }
+  if(s.includes('餵養')||s.includes('餵養它'))document.getElementById('breaktext').textContent='提醒：請勿重複搜尋相同關鍵字';
+  if(s.includes('觀看'))document.getElementById('breaktext').textContent='感謝您的觀看。';
+}
+
+function toast(t){
+  let e=document.getElementById('toast');
+  e.textContent=t;
+  e.classList.add('show');
+  clearTimeout(window.tt);
+  window.tt=setTimeout(()=>e.classList.remove('show'),2200);
+}
+
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')searchNews()});
+corrupt();
+</script>
+</body>
+</html>

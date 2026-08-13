@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mina Mail ｜ 收件匣</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#202124;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.top{height:58px;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;padding:0 22px;gap:14px;position:sticky;top:0}.logo{font-weight:800;font-size:20px}.tag{font-size:12px;color:#777}.wrap{max-width:980px;margin:28px auto;padding:0 18px;display:grid;grid-template-columns:230px 1fr;gap:18px}.side,.mail{background:#fff;border:1px solid #ddd;border-radius:12px}.side{padding:16px}.side button{width:100%;padding:10px;border:0;background:#111;color:#fff;border-radius:9px;margin-bottom:12px}.side div{padding:9px;color:#666;font-size:13px}.mail{overflow:hidden}.mailhead{padding:18px;border-bottom:1px solid #eee}.mailrow{padding:15px 18px;border-bottom:1px solid #eee;cursor:pointer}.mailrow:hover{background:#fafafa}.mailrow strong{display:block}.mailrow span{color:#777;font-size:12px}.mailbody{display:none;padding:22px;line-height:1.75;font-size:14px}.mailbody.show{display:block}.warning{background:#fff7e6;border:1px solid #f0d39a;padding:12px;border-radius:10px;color:#6d531b;margin:12px 0}.unlock{margin-top:18px;padding:13px;border:1px dashed #777;border-radius:10px;background:#fafafa}.unlock button{margin-top:10px;padding:9px 13px;border:0;border-radius:8px;background:#111;color:#fff}.back{margin-left:auto;color:#555;font-size:12px}
+.gate{position:fixed;inset:0;background:#f4f5f7;display:flex;align-items:center;justify-content:center;z-index:10}.gatebox{width:min(380px,92%);background:#fff;border:1px solid #ddd;border-radius:14px;padding:24px;box-shadow:0 15px 50px rgba(0,0,0,.08)}.gatebox h2{margin:0 0 6px}.gatebox p{font-size:12px;color:#777;line-height:1.6}.gatebox input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ccc;border-radius:9px;margin:6px 0}.gatebox button{width:100%;padding:10px;background:#111;color:#fff;border:0;border-radius:9px;margin-top:8px}.gatehint{font-size:11px;color:#999;margin-top:10px} .hidden{display:none!important}</style></head><body>
+<div class="gate" id="gate"><div class="gatebox"><h2>Mina Mail</h2><p>工作信箱需要登入。你已經從 Threads 找到帳號線索，請自行解出密碼。</p><input id="emailUser" placeholder="電子郵件"><input id="emailPass" type="password" placeholder="密碼"><button onclick="loginMail()">登入信箱</button><div class="gatehint">提示：聊天室最後留下的句子可能就是密碼。</div></div></div>
+<div class="top"><div class="logo">Mina Mail</div><div class="tag">mina1999@hotmail.com</div><a class="back" href="mina_threads.html">← 回到 Threads</a></div>
+<div class="wrap"><aside class="side"><button onclick="openMail('welcome')">✉ 收件匣</button><div>重要郵件　3</div><div>已加星號　7</div><div>草稿　4</div><div>垃圾郵件　19</div><div style="margin-top:18px;color:#aaa">工作帳號</div></aside>
+<main class="mail"><div class="mailhead"><strong>收件匣</strong><span style="float:right;color:#888;font-size:12px">2019—2026</span></div>
+<div class="mailrow" onclick="openMail('hr')"><strong>人資部｜年度績效與改善通知</strong><span>2025/11/04　「請注意團隊合作問題」</span></div>
+<div class="mailrow" onclick="openMail('boss')"><strong>主管｜Re: 專案簡報</strong><span>2026/02/17　「這不是妳應該反駁的事情」</span></div>
+<div class="mailrow" onclick="openMail('client')"><strong>客戶服務轉寄｜對外說明</strong><span>2026/05/29　「請先不要提到原始負責人」</span></div>
+<div class="mailrow" onclick="openMail('friend')"><strong>Chloe｜妳最近還好嗎？</strong><span>2026/07/30　「妳可以直接跟我說」</span></div>
+<div id="mailbody" class="mailbody"></div></main></div>
+<script>
+const DATA={
+ welcome:`<p>這是 Mina 的舊工作信箱。部分郵件看起來像被整理過，時間軸中有幾段空白。</p><p>如果你是從 Threads 找到這裡，請注意：這些內容都是本 ARG 的虛構資料。</p>`,
+ hr:`<p><b>人資部：</b></p><p>近期收到多次反映，表示妳在會議中「態度過於直接」。另請妳避免在公開頻道討論分工與加班問題。</p><div class="warning">備註：原始申訴紀錄並未附在此封郵件中。</div><p>Mina 回覆：我只是想確認為什麼我完成的工作最後變成別人的名字。</p>`,
+ boss:`<p><b>主管：</b></p><p>簡報已由我統一調整。之後請妳不要在會議上直接指出版本差異，容易讓其他人感到不舒服。</p><p><b>Mina：</b>可是那些數據是我整理的，而且我昨天凌晨才完成。</p><p><b>主管：</b>大家都很辛苦。不要把事情想得太複雜。</p>`,
+ client:`<p><b>轉寄內容：</b></p><p>客戶表示對方案很滿意。</p><p>然而對外簡報署名改成了另一位同事。Mina 的原始附件仍在信件紀錄裡。</p><div class="warning">你開始發現：她不是一次被忽略，而是很多次。</div>`,
+ friend:`<p><b>Chloe：</b></p><p>妳最近是不是又沒睡？</p><p>我知道妳說沒事，但妳每次說「沒事」的方式都一樣。</p><p>如果工作真的讓妳很難受，先離開那個聊天室也可以。妳不用證明自己撐得住。</p><div class="unlock">你已經看完關鍵工作紀錄。<br><button onclick="unlock()">🔓 回到 Threads，解鎖 2026 年紀錄</button></div>`
+};
+function loginMail(){
+  const u=document.getElementById('emailUser').value.trim().toLowerCase();
+  const pw=document.getElementById('emailPass').value.trim();
+  if(u==='mina1999@hotmail.com' && pw==='ilovemyjob'){
+    document.getElementById('gate').classList.add('hidden');
+    openMail('welcome');
+  }else{
+    alert('登入失敗。提示：帳號在聊天室裡；密碼是一句她曾經相信的英文。');
+  }
+}
+function openMail(k){document.getElementById('mailbody').innerHTML=DATA[k];document.getElementById('mailbody').classList.add('show')}
+function unlock(){localStorage.setItem('mina_email_unlocked','1');window.open('mina_threads.html','_blank');}
+
+</script></body></html>
