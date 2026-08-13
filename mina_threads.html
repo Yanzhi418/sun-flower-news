@@ -52,16 +52,21 @@ button{font:inherit;background:none;border:none;color:inherit;cursor:pointer}
 
 /* 留言區塊 */
 .comments-box{margin-top:12px;background:#161616;border-radius:8px;padding:10px 12px;border:1px solid #222}
-.comment-item{font-size:13px;padding:6px 0;border-bottom:1px solid #202020;display:flex;gap:8px}
+.comment-item{font-size:13px;padding:6px 0;border-bottom:1px solid #202020;display:flex;gap:8px;align-items:baseline}
 .comment-item:last-child{border-bottom:none}
 .comment-user{font-weight:bold;color:#4ea8de;cursor:pointer;white-space:nowrap}
+.comment-user.creepy-user-1{color:#888}
+.comment-user.creepy-user-2{color:#ffb74d}
+.comment-user.creepy-user-3{color:#ff5252}
+.comment-user.creepy-user-4{color:#d50000;font-weight:900}
 .comment-user:hover{text-decoration:underline}
 .comment-text{color:#ccc;flex:1}
+.comment-text.creepy-lvl-3{color:#ff8a80;font-weight:500}
+.comment-text.creepy-lvl-4{color:#ff1744;font-weight:bold;letter-spacing:0.5px}
 
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:none;z-index:200}
 
-
-/* ===== ARG 新增：聊天室 / 解鎖 / 紀念頁 ===== */
+/* ARG 工具與聊天室 */
 .arg-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .arg-btn{background:#262626;border:1px solid #383838;color:#eee;padding:7px 13px;border-radius:18px;font-size:12px;cursor:pointer}
 .arg-btn:hover{background:#333}
@@ -84,6 +89,26 @@ button{font:inherit;background:none;border:none;color:inherit;cursor:pointer}
 .login-box button{width:100%;background:#fff;color:#111;border-radius:10px;padding:10px;margin-top:10px;font-weight:700}
 .login-note{margin-top:10px;color:#666;font-size:11px}
 
+/* ===== 2026 專用：驚悚文字瀑布 UI ===== */
+.btn-waterfall{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 14px;background:rgba(180, 0, 0, 0.15);border:1px solid rgba(255, 50, 50, 0.4);color:#ff6b6b;border-radius:20px;font-size:12px;font-weight:bold;cursor:pointer;transition:all 0.2s}
+.btn-waterfall:hover{background:rgba(255, 0, 0, 0.25);color:#fff;border-color:#ff0000;box-shadow:0 0 12px rgba(255,0,0,0.4)}
+
+.waterfall-modal{display:none;position:fixed;inset:0;background:rgba(5, 2, 2, 0.96);z-index:999;flex-direction:column;font-family:monospace,"Courier New",Courier;backdrop-filter:blur(8px)}
+.waterfall-modal.show{display:flex}
+.waterfall-header{padding:14px 20px;background:#150505;border-bottom:1px solid #3a0000;display:flex;justify-content:space-between;align-items:center;color:#ff5252;font-weight:bold;font-size:14px}
+.waterfall-close{background:#2a0808;border:1px solid #5a1010;color:#ff8a80;padding:4px 12px;border-radius:12px;font-size:12px;cursor:pointer}
+.waterfall-close:hover{background:#4a0000;color:#fff}
+.waterfall-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.4;scrollbar-width:thin}
+.waterfall-line{opacity:0.9;word-break:break-all;animation:waterfallFade 0.15s ease-out}
+.waterfall-line.lvl-1{color:#888}
+.waterfall-line.lvl-2{color:#ffb74d}
+.waterfall-line.lvl-3{color:#ff5252;font-weight:bold}
+.waterfall-line.lvl-4{color:#ff1744;font-weight:900;text-shadow:0 0 6px rgba(255,0,0,0.8);letter-spacing:1px}
+
+@keyframes waterfallFade{
+  0%{opacity:0;transform:translateY(-4px);filter:blur(2px)}
+  100%{opacity:0.9;transform:translateY(0);filter:blur(0)}
+}
 </style>
 </head>
 <body>
@@ -121,6 +146,15 @@ button{font:inherit;background:none;border:none;color:inherit;cursor:pointer}
 </main>
 
 <div class="toast" id="toast">已切換個人頁面</div>
+
+<!-- 驚悚文字瀑布 Modal UI (2026 專用) -->
+<div class="waterfall-modal" id="waterfallModal">
+  <div class="waterfall-header">
+    <span>⚠️ 異常訊息數據串流 (18,492 條實時監控留言)</span>
+    <button class="waterfall-close" onclick="closeWaterfallModal()">關閉 ✖</button>
+  </div>
+  <div class="waterfall-body" id="waterfallBody"></div>
+</div>
 
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
@@ -192,8 +226,216 @@ const USERS = {
   }
 };
 
-// ===== Mina 的歷史貼文紀錄 (2014-2021 大量追星、瘋狂買專、搶票、時事與學校日常) =====
+// ===== 漸進式毛骨悚然留言庫 (共 100 則) =====
+const creepyComments = [
+  // Phase 1: 正常酸民/ Threads 網民嘴砲 (1-35)
+  "要確欸... 這觀念真的好解 🙄", "翻車了還在同溫層討拍，看得很躁", "硬要蹭，優越感都快滿出來了",
+  "笑死破防成這樣，到底在演哪齣？", "社交邊界感零，建議這篇先刪了，真的超下頭", "前面不是還在裝？結果秒被打臉 🤡",
+  "這操作太神了，留友看 🍿", "不是，只有我覺得她講話很假嗎？", "退追了，越看越不舒服", "噁心，到底誰給你的勇氣？",
+  "這種品質也有人追蹤， Threads 真的沒救了", "別再裝被害者了好嗎，真的可憐", "你以為大家都盲目嗎？這次沒人挺你",
+  "講話完全沒有邏輯，看了好尷尬", "這人設是不是快垮了？", "一直洗版有完沒完啊？", "笑死，被抓包就開始裝死",
+  "打那麼多字，還不是在避重就輕", "這年頭講話都不用負責任的喔？", "真的越來越討厭這個人，滾好嗎",
+  "同溫層再繼續捧啊，外面早就笑成一片了", "建議直接退網，對大家都好", "這發言真的刷新我底線",
+  "笑死，演給誰看？", "完全沒意識到自己錯在哪，真可憐", "你這樣做對得起其他人嗎？", "刪留言速度真快捏 🤡",
+  "建議看一下心理醫生，感覺精神不是很正常", "別再害人了，收手吧", "看了真的會吐，怎麼會有人支持？",
+  "路人路過都覺得傻眼", "拜託不要再出來刷存在感了", "這台詞是不是複製貼上的？", "你的良心不會痛嗎？", "笑死，又在自我感覺良好",
+
+  // Phase 2: 細思極恐/針對個人的監視感知 (36-70)
+  "你以為你把舊文章刪掉，我就沒有備份嗎？", "你現在是不是一直按重新整理？", "不要以為在螢幕後面就沒人知道你是誰",
+  "你現在穿的衣服，我上個禮拜看你穿過", "你剛剛是不是往後看了一下？", "你的房間燈不要開那麼暗，對眼睛不好",
+  "你是不是覺得只要關掉網頁就沒事了？", "我聽得到你呼吸的聲音喔", "你滑手機的速度變快了，你在害怕嗎？",
+  "螢幕反射出來的眼睛，很漂亮呢", "不要再往下刷了，看著我", "你以為這只是個模擬網站嗎？",
+  " Mina 根本不存在，那你在看誰？", "你現在看的這張圖片，裡面有我", "你的鏡頭一直開著喔，你知道嗎？",
+  "不要轉頭，我真的在後面", "你的鍵盤敲擊聲太響了", "為什麼不敢讀完？你在怕什麼？",
+  "你以為你在玩遊戲，但我們在看你", "你昨晚是不是沒睡好？", "這不是程式碼，這是在跟你對話",
+  "你住的地方，離松山很近吧？", "不要走，留下來陪我們", "我們大家都在這裡看著你的一舉一動",
+  "你現在的表情真好看，再維持一下", "你是不是開始覺得背脊發涼了？", "我們早就拿到你的IP了",
+  "螢幕後面的你，笑一個嘛", "不要以為這只是網頁效果", "你逃不掉的，這裡全都是我們的人",
+  "不要按離開，按了也沒用", "你是不是在找關掉視窗的按鈕？", "找不到對吧？因為根本沒有",
+  "你的名字，我們都知道了", "你今天晚上睡得著嗎？",
+
+  // Phase 3: 瘋狂、覆蓋、洗版暴走 (71-100+)
+  "看我看我看我看我看我看我看我", "不要離開不要離開不要離開不要離開", "找到你了找到你了找到你了找到你了",
+  "你在看螢幕你在看螢幕你在看螢幕", "轉頭轉頭轉頭轉頭轉頭轉頭轉頭", "逃不掉逃不掉逃不掉逃不掉逃不掉",
+  "我們在裡面我們在裡面我們在裡面", "眼睛張開眼睛張開眼睛張開", "把手機放下把手機放下把手機放下",
+  "讓我進去讓我進去讓我進去讓我進去", "我看到你了我看到你了我看到你了", "你在害怕你在害怕你在害怕你在害怕",
+  "Mina就是你Mina就是你Mina就是你", "不要關掉不要關掉不要關掉不要關掉", "已經太遲了已經太遲了已經太遲了",
+  "你在看這行字你在看這行字你在看這行字", "後面後面後面後面後面後面後面", "我們都在這裡看著你",
+  "不要走不要走不要走不要走不要走", "這不是遊戲這不是遊戲這不是遊戲", "我們找到你了我們找到你了",
+  "把門鎖上把門鎖上把門鎖上", "不要回頭不要回頭不要回頭", "看著我看著我看著我看著我",
+  "你跑不掉的你跑不掉的你跑不掉的", "關不掉關不掉關不掉關不掉", "我們同在我們同在我們同在",
+  "開門開門開門開門開門開門", "謝謝你把我們放出來", "現在，換你在裡面了。"
+];
+
+// ===== Mina 的歷史貼文紀錄 =====
 const POSTS = [
+  // 2026 年 (ARG 核心劇情，附帶驚悚留言瀑布)
+  {
+    id: "p2026_1",
+    author: "mina_1999_official",
+    time: "2026年8月02日",
+    tag: "最後更新",
+    text: "謝謝曾經來過這裡的人。\n這個帳號我可能會暫時停下來。\n如果之後還有新的貼文，不一定是我。",
+    likes: 52190,
+    views: 4102831,
+    commentCount: 128942,
+    arg2026: true,
+    comments: [
+      { user: "jenny_kpop_life", text: "Mina，我們都在。" },
+      { user: "chloe_chennn", text: "我會一直等妳回訊息。" },
+      { user: "alex_ntu_cs", text: "妳信箱裡那件事，我們可以一起處理。" },
+      { user: "emily_vlog", text: "拜託看到這則就回來。" },
+      { user: "ray_basketball_07", text: "有事就打給我，不要消失。" },
+      { user: "near_you_99", text: "3:50 下班回頂溪的那條路，今天特別安靜呢。", creepyLvl: 2 },
+      { user: "behind_door", text: "我就在門口。開門。", creepyLvl: 3 },
+      { user: "NULL_VOID_00", text: "開門開門開門開門開門開門開門", creepyLvl: 4 }
+    ]
+  },
+  {
+    id: "p2026_2",
+    author: "mina_1999_official",
+    time: "2026年7月28日",
+    tag: "近況",
+    text: "最近好像很多人都在看我。\n公司裡的事情、網路上的事情，全都混在一起了。\n我先把通知關掉。",
+    likes: 18340,
+    views: 982144,
+    commentCount: 18492,
+    arg2026: true,
+    comments: [
+      { user: "jenny_kpop_life", text: "Mina，妳還好嗎？看到的話回我一下。" },
+      { user: "chloe_chennn", text: "不要一個人扛，拜託聯絡我。" },
+      { user: "white_shirt_boy", text: "今天在松山看到的白色襯衫很好看喔。", creepyLvl: 2 },
+      { user: "doorbell_press", text: "叮咚。叮咚。為什麼不回訊息？", creepyLvl: 3 }
+    ]
+  },
+  // 2025 年
+  {
+    id: "p2025_3",
+    author: "mina_1999_official",
+    time: "2025年11月14日",
+    tag: "日常",
+    text: "最近信箱裡怪信越來越多… 各種不知道哪裡洩漏的推銷跟奇怪留言。\n大家個人資料真的要保護好 😞",
+    likes: 88,
+    comments: [{ user: "alex_ntu_cs", text: "妳是不是在哪個怪網站留了 Email？要不要我幫妳過濾？" }]
+  },
+  {
+    id: "p2025_2",
+    author: "mina_1999_official",
+    time: "2025年06月20日",
+    tag: "日常",
+    text: "台北午後雷陣雨太狂了吧！直接被困在超商騎樓半小時… 沒帶傘的悲劇 🌧️☔️",
+    media: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=800&q=80",
+    likes: 132,
+    comments: [{ user: "chloe_chennn", text: "我剛剛也差點被淹沒！" }]
+  },
+  {
+    id: "p2025_1",
+    author: "mina_1999_official",
+    time: "2025年02月03日",
+    tag: "碎碎念",
+    text: "過年吃太多肉了… 明天開始一定要恢復去跑操場！真的不能再擺爛了 🏃‍♀️💨",
+    likes: 95
+  },
+  // 2024 年
+  {
+    id: "p2024_4",
+    author: "mina_1999_official",
+    time: "2024年12月25日",
+    tag: "聖誕節 🎄",
+    text: "聖誕節大家都在過雙人節，我們一群單身狗在麻辣火鍋店吃到吐 🍲🔥\n感謝大家相救，今年依然有你們真好！",
+    media: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+    likes: 210,
+    comments: [
+      { user: "ray_basketball_07", text: "那天肉盤疊得跟山一樣高爆笑" },
+      { user: "emily_vlog", text: "下次我要吃起司鍋！" }
+    ]
+  },
+  {
+    id: "p2024_3",
+    author: "mina_1999_official",
+    time: "2024年08月18日",
+    tag: "碎碎念",
+    text: "買了新的蜜桃味香氛擴香，終於把房間整理乾淨了 ☁️✨\n乾淨的房間真的好治癒心靈喔。",
+    likes: 140
+  },
+  {
+    id: "p2024_2",
+    author: "mina_1999_official",
+    time: "2024年04月10日",
+    tag: "職場日常",
+    text: "連續三天加班到快十點，信義區的夜景雖然好看，但我現在只想回家倒頭大睡 😴🏙️\n咖啡已經無法提神了…",
+    media: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    likes: 175,
+    comments: [{ user: "jenny_kpop_life", text: "辛苦了！週末出來喝一杯啦！" }]
+  },
+  {
+    id: "p2024_1",
+    author: "mina_1999_official",
+    time: "2024年01月15日",
+    tag: "日常",
+    text: "週一早上的捷運板南線到底是什麼人間煉獄… 差點被擠成兩半 🫠",
+    likes: 112
+  },
+  // 2023 年
+  {
+    id: "p2023_3",
+    author: "mina_1999_official",
+    time: "2023年11月02日",
+    tag: "美食 🍳",
+    text: "頂溪租屋處附近發現一家超強早餐店！芋泥蛋餅跟燻雞堡好吃到哭 🤤🍞\n以後週末的早餐都有著落了！",
+    media: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80",
+    likes: 198,
+    comments: [{ user: "chloe_chennn", text: "求地址！這週末去找妳住順便吃！" }]
+  },
+  {
+    id: "p2023_2",
+    author: "mina_1999_official",
+    time: "2023年06月18日",
+    tag: "碎碎念",
+    text: "週日晚上開始感到星期一的焦慮… 好想當一隻每天只要睡覺吃飯的小貓咪 🐱💤",
+    likes: 165
+  },
+  {
+    id: "p2023_1",
+    author: "mina_1999_official",
+    time: "2023年01月20日",
+    tag: "職場新人",
+    text: "領到人生第一個完整的年終獎金了！立刻去把購物車裡觀望很久的美容儀下單！小確幸 💕",
+    likes: 240,
+    comments: [{ user: "emily_vlog", text: "恭喜 Mina！！我也要看開箱！" }]
+  },
+  // 2022 年
+  {
+    id: "p2022_3",
+    author: "mina_1999_official",
+    time: "2022年10月05日",
+    tag: "社會人",
+    text: "工作了一個月的感想：學生時期真的是人生最美好的時候… 下班回家只想躺平，完全沒體力追星了 🫠",
+    likes: 280,
+    comments: [{ user: "jenny_kpop_life", text: "歡迎來到社畜的世界… 撐住啊！" }]
+  },
+  {
+    id: "p2022_2",
+    author: "mina_1999_official",
+    time: "2022年06月18日",
+    tag: "畢業快樂 🎓",
+    text: "台大畢業典禮 🎓✨\n謝謝這四年陪我一起走過的所有人！從高中到大學一直在一起的 @chloe_chennn ，還有幫我寫搶票腳本的 @alex_ntu_cs 👨‍💻\n我們要正式進入社會囉，祝大家前程似錦！🕊️❤️",
+    media: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80",
+    likes: 512,
+    comments: [
+      { user: "chloe_chennn", text: "畢業快樂！！愛妳啦！" },
+      { user: "alex_ntu_cs", text: "恭喜畢業！以後腳本維護要收費了喔哈哈" }
+    ]
+  },
+  {
+    id: "p2022_1",
+    author: "mina_1999_official",
+    time: "2022年02月14日",
+    tag: "論文地獄",
+    text: "圖書館九樓窗外的風景真好看，但我的畢業論文進度還是零 🥲📖\n到底誰能來救救我的外文系文學史大論文…",
+    likes: 145
+  },
+  // 2021 年
   {
     id: "p2021_4",
     author: "mina_1999_official",
@@ -234,6 +476,7 @@ const POSTS = [
       { user: "alex_ntu_cs", text: "我在隔壁聽妳 Discord 的麥克風收音全是爆音尖叫聲，笑死" }
     ]
   },
+  // 2020 年
   {
     id: "p2020_3",
     author: "mina_1999_official",
@@ -260,6 +503,15 @@ const POSTS = [
       { user: "jenny_kpop_life", text: "完蛋我今天打工沒去到第二家！杯套還有剩嗎 😭😭" }
     ]
   },
+  {
+    id: "p2020_1",
+    author: "mina_1999_official",
+    time: "2020年04月12日",
+    tag: "居家防疫",
+    text: "在家遠距上課第三週。嘗試自己煮400次咖啡跟紅豆湯，結果紅豆湯燒焦了阿阿阿阿 🔥☕️\n廚藝黑洞名不虛傳… 我還是乖乖叫外送好了。",
+    likes: 168
+  },
+  // 2019 年
   {
     id: "p2019_3",
     author: "mina_1999_official",
@@ -288,6 +540,24 @@ const POSTS = [
     ]
   },
   {
+    id: "p2019_1",
+    author: "mina_1999_official",
+    time: "2019年03月11日",
+    tag: "大學日常",
+    text: "我的學生證到底掉在哪裡了啦阿阿阿阿！！💳💥\n昨天才剛儲值了五百塊悠遊卡… 拜託撿到的人拿去台大心園丟失物招領處，我請你喝一杯珍珠奶茶 😭😭",
+    likes: 122
+  },
+  // 2018 年
+  {
+    id: "p2018_3",
+    author: "mina_1999_official",
+    time: "2018年10月18日",
+    tag: "大一新生",
+    text: "台大校園真的太大了吧！第一週腳踏車就被拖吊… 微積分課完全聽不懂，我真的是憑實力考進來的嗎 🫠🚴‍♀️",
+    likes: 188,
+    comments: [{ user: "alex_ntu_cs", text: "水源校區水源阿姨人很好的，去領車順便吃麵！" }]
+  },
+  {
     id: "p2018_2",
     author: "mina_1999_official",
     time: "2018年6月15日",
@@ -300,6 +570,15 @@ const POSTS = [
       { user: "ray_basketball_07", text: "額… Mina 妳還好嗎？明天高中畢業典禮眼睛會腫成泡疹吧…" }
     ]
   },
+  {
+    id: "p2018_1",
+    author: "mina_1999_official",
+    time: "2018年02月14日",
+    tag: "學測放榜 🎓",
+    text: "學測成績出來了！終於不用指考了！！！老天爺保佑 😭😭✨\n接下來就是要好好準備面試，希望一切順利！可以開始狂補追星進度了！",
+    likes: 275
+  },
+  // 2017 - 2014 年
   {
     id: "p2017_2",
     author: "mina_1999_official",
@@ -347,43 +626,7 @@ const POSTS = [
     text: "國中畢業的暑假。第一次在 YouTube 上看到這個韓國男團的舞台剪輯… ✨\n那時候每天晚上隔壁房間都是爸媽大吵嚷著要離婚、摔碗盤的聲音… 我躲在被窩裡戴上耳機，看著他們在舞台上閃閃發光、熱情奔跑的樣子，眼淚一直掉。\n原來音樂和偶像真的有拯救人的力量。謝謝你們出現在我的青春裡 🕊️❤️",
     media: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=800&q=80",
     likes: 120,
-    comments: [
-      { user: "chloe_chennn", text: "Mina 抱抱！高中開始有我在，妳再也不孤單了！" }
-    ]
-  }
-,
-  {
-    id: "p2026_2",
-    author: "mina_1999_official",
-    time: "2026年7月28日",
-    tag: "近況",
-    text: "最近好像很多人都在看我。\n公司裡的事情、網路上的事情，全都混在一起了。\n我先把通知關掉。",
-    likes: 18340,
-    views: 982144,
-    commentCount: 18492,
-    arg2026: true,
-    comments: [
-      { user: "jenny_kpop_life", text: "Mina，妳還好嗎？看到的話回我一下。" },
-      { user: "chloe_chennn", text: "不要一個人扛，拜託聯絡我。" }
-    ]
-  },
-  {
-    id: "p2026_1",
-    author: "mina_1999_official",
-    time: "2026年8月02日",
-    tag: "最後更新",
-    text: "謝謝曾經來過這裡的人。\n這個帳號我可能會暫時停下來。\n如果之後還有新的貼文，不一定是我。",
-    likes: 52190,
-    views: 4102831,
-    commentCount: 128942,
-    arg2026: true,
-    comments: [
-      { user: "jenny_kpop_life", text: "Mina，我們都在。" },
-      { user: "chloe_chennn", text: "我會一直等妳回訊息。" },
-      { user: "alex_ntu_cs", text: "妳信箱裡那件事，我們可以一起處理。" },
-      { user: "emily_vlog", text: "拜託看到這則就回來。" },
-      { user: "ray_basketball_07", text: "有事就打給我，不要消失。" }
-    ]
+    comments: [{ user: "chloe_chennn", text: "Mina 抱抱！高中開始有我在，妳再也不孤單了！" }]
   }
 ];
 
@@ -452,6 +695,9 @@ const OTHER_POSTS = {
 };
 
 let currentHandle = "mina_1999_official";
+let floodInterval = null;
+let creepyIndex = 0;
+const u = "Visitor"; // 當前觀察者 ID
 
 // 切換個人頁面路由
 function switchProfile(handle) {
@@ -468,7 +714,6 @@ function renderProfile() {
   const user = USERS[currentHandle];
   const container = document.getElementById("profileContainer");
 
-  // 生成好友快捷按鈕
   let friendsHTML = user.friends.map(fHandle => {
     const fUser = USERS[fHandle];
     return `
@@ -501,7 +746,7 @@ function renderProfile() {
       ${currentHandle === 'mina_1999_official' ? `
       <div class="arg-tools">
         <button class="arg-btn" onclick="toggleChat()">💬 聊天室</button>
-        <button onclick="window.location.href='mina_email.html'">✉️ 信箱</button>
+        <button class="arg-btn" onclick="openEmail()">✉️ 信箱</button>
       </div>` : ''}
       <div class="friends-bar">
         <span style="font-size:12px;color:#666;align-self:center;">好友圈（點擊查看主頁）：</span>
@@ -515,50 +760,65 @@ function renderProfile() {
 // 渲染動態貼文
 function renderPosts() {
   const container = document.getElementById("postsContainer");
-  let postList = currentHandle === "mina_1999_official" ? POSTS.filter(p => !p.arg2026 || localStorage.getItem('mina_email_unlocked') === '1') : (OTHER_POSTS[currentHandle] || []);
+  let postList = currentHandle === "mina_1999_official" 
+    ? POSTS.filter(p => !p.arg2026 || localStorage.getItem('mina_email_unlocked') === '1') 
+    : (OTHER_POSTS[currentHandle] || []);
 
   if (postList.length === 0) {
-    container.innerHTML = `<div style="text-align:center;padding:40px;color:#666;">該帳號尚未發布公開紀錄。</div>`;
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:#666;">尚無公開貼文紀錄</div>`;
     return;
   }
 
   container.innerHTML = postList.map(post => {
-    const author = USERS[post.author];
-
-    // 渲染留言
+    const authorUser = USERS[post.author] || USERS.mina_1999_official;
+    
     let commentsHTML = "";
     if (post.comments && post.comments.length > 0) {
       commentsHTML = `
         <div class="comments-box">
-          ${post.comments.map(c => `
-            <div class="comment-item">
-              <span class="comment-user" onclick="switchProfile('${c.user}')">@${c.user}</span>
-              <span class="comment-text">${c.text}</span>
-            </div>
-          `).join('')}
+          ${post.comments.map(c => {
+            const commenter = USERS[c.user] || { name: c.user, handle: c.user };
+            let userClass = c.creepyLvl ? `creepy-user-${c.creepyLvl}` : '';
+            let textClass = c.creepyLvl ? `creepy-lvl-${c.creepyLvl}` : '';
+            return `
+              <div class="comment-item">
+                <span class="comment-user ${userClass}" onclick="switchProfile('${c.user}')">@${commenter.handle || c.user}:</span>
+                <span class="comment-text ${textClass}">${c.text}</span>
+              </div>
+            `;
+          }).join('')}
         </div>
+      `;
+    }
+
+    let waterfallBtnHTML = "";
+    if (post.arg2026) {
+      waterfallBtnHTML = `
+        <button class="btn-waterfall" onclick="openWaterfallModal()">
+          ⚠️ 開啟數據監控串流 (${post.commentCount ? post.commentCount.toLocaleString() : '18,492'} 條留言)
+        </button>
       `;
     }
 
     return `
       <article class="post">
-        <img class="post-avatar" src="${author.avatar}" onclick="switchProfile('${author.handle}')">
+        <img class="post-avatar" src="${authorUser.avatar}" onclick="switchProfile('${authorUser.handle}')">
         <div class="post-main">
           <div class="post-header">
             <div>
-              <span class="user-link" onclick="switchProfile('${author.handle}')">${author.name}</span>
-              <span class="post-tag">${post.tag || '日常'}</span>
+              <span class="user-link" onclick="switchProfile('${authorUser.handle}')">${authorUser.name}</span>
+              ${post.tag ? `<span class="post-tag">${post.tag}</span>` : ''}
             </div>
             <span class="post-time">${post.time}</span>
           </div>
           <div class="post-content">${post.text}</div>
-          ${post.media ? `<img class="post-media" src="${post.media}">` : ''}
+          ${post.media ? `<img class="post-media" src="${post.media}" loading="lazy">` : ''}
           <div class="post-actions">
-            <span>♡ ${post.likes}</span>
+            <span>❤️ ${post.likes ? post.likes.toLocaleString() : 0}</span>
             <span>💬 ${post.commentCount ? post.commentCount.toLocaleString() : (post.comments ? post.comments.length : 0)}</span>
-            ${post.views ? `<span>◉ ${post.views.toLocaleString()} 次觀看</span>` : ''}
-            <span>🔁 轉發</span>
+            ${post.views ? `<span>👁️ ${post.views.toLocaleString()}</span>` : ''}
           </div>
+          ${waterfallBtnHTML}
           ${commentsHTML}
         </div>
       </article>
@@ -566,61 +826,149 @@ function renderPosts() {
   }).join('');
 }
 
+// ===== 驚悚留言瀑布洗版與高潮 logic =====
+function openWaterfallModal() {
+  const modal = document.getElementById("waterfallModal");
+  modal.classList.add("show");
+  const body = document.getElementById("waterfallBody");
+  body.innerHTML = "";
+  creepyIndex = 0;
+  if (floodInterval) clearInterval(floodInterval);
+  startFlood();
+}
+
+function closeWaterfallModal() {
+  const modal = document.getElementById("waterfallModal");
+  modal.classList.remove("show");
+  if (floodInterval) clearInterval(floodInterval);
+}
+
+function startFlood() {
+  let speed = 600;
+
+  function postNext() {
+    if (creepyIndex >= creepyComments.length) {
+      triggerClimax();
+      return;
+    }
+
+    const body = document.getElementById("waterfallBody");
+    if (!body) return;
+
+    const line = document.createElement("div");
+    let lvlClass = "lvl-1";
+    if (creepyIndex >= 70) lvlClass = "lvl-4";
+    else if (creepyIndex >= 35) lvlClass = "lvl-3";
+    else if (creepyIndex >= 15) lvlClass = "lvl-2";
+
+    line.className = `waterfall-line ${lvlClass}`;
+    line.textContent = `[${new Date().toLocaleTimeString()}] watcher_${Math.floor(Math.random()*899+100)}: ${creepyComments[creepyIndex]}`;
+    body.appendChild(line);
+    body.scrollTop = body.scrollHeight;
+
+    creepyIndex++;
+
+    // 隨著階段加速
+    if (creepyIndex > 70) {
+      speed = Math.max(30, speed * 0.82); // 指數級爆速
+    } else if (creepyIndex > 35) {
+      speed = 180;
+    } else if (creepyIndex > 15) {
+      speed = 350;
+    }
+
+    floodInterval = setTimeout(postNext, speed);
+  }
+
+  postNext();
+}
+
+function triggerClimax() {
+  if (floodInterval) clearInterval(floodInterval);
+  const body = document.getElementById("waterfallBody");
+  if (body) {
+    const finalMsg = document.createElement("div");
+    finalMsg.className = "waterfall-line lvl-4";
+    finalMsg.style.fontSize = "16px";
+    finalMsg.style.marginTop = "20px";
+    finalMsg.style.borderTop = "1px dashed red";
+    finalMsg.style.paddingTop = "10px";
+    finalMsg.innerHTML = `<strong>歡迎，@${u}。你現在也是「觀看」的一部分。</strong>`;
+    body.appendChild(finalMsg);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  setTimeout(() => {
+    showSmileyOverlay();
+  }, 1200);
+}
+
+function showSmileyOverlay() {
+  if (document.getElementById("scare-overlay")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "scare-overlay";
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: #000;
+    color: #ff0000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    font-family: monospace;
+    text-align: center;
+    padding: 20px;
+  `;
+
+  overlay.innerHTML = `
+    <pre style="font-size: 20px; line-height: 1.2; text-shadow: 0 0 10px red;">
+   .--------.
+  /          \\
+ |  o    o    |
+ |    __      |
+  \\  \\__/    /
+   '--------'
+    </pre>
+    <h1 style="margin-top: 20px; font-size: 52px; letter-spacing: 6px; text-shadow: 0 0 15px red;">: )</h1>
+    <p style="margin-top: 20px; color: #aaa; font-size: 15px; letter-spacing: 1px;">歡迎，@${u}。你現在也是「觀看」的一部分。</p>
+    <button onclick="document.getElementById('scare-overlay').remove()" style="margin-top: 35px; background: #1a0000; border: 1px solid #ff0000; color: #ff8a80; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 12px;">關閉觀察窗</button>
+  `;
+
+  document.body.appendChild(overlay);
+}
+
+// ===== ARG 互動工具函式 =====
+function toggleChat() {
+  const panel = document.getElementById("chatPanel");
+  panel.classList.toggle("open");
+}
+
+function openEmail() {
+  document.getElementById("loginScreen").classList.add("show");
+}
+
+function fakeLogin() {
+  document.getElementById("loginScreen").classList.remove("show");
+  localStorage.setItem('mina_email_unlocked', '1');
+  document.getElementById("unlockBanner").classList.add("show");
+  showToast("已成功解鎖隱藏資料庫！");
+  renderPosts();
+}
+
 function showToast(msg) {
   const toast = document.getElementById("toast");
   toast.textContent = msg;
   toast.style.display = "block";
-  setTimeout(() => { toast.style.display = "none"; }, 2000);
+  setTimeout(() => { toast.style.display = "none"; }, 2500);
 }
 
-
-function toggleChat(){
-  const panel=document.getElementById('chatPanel');
-  if(panel) panel.classList.toggle('open');
-}
-function openEmail(){
-  window.open('mina_email.html','_blank','noopener');
-}
-function emailUnlocked(){
-  localStorage.setItem('mina_email_unlocked','1');
-  const b=document.getElementById('unlockBanner');
-  if(b) b.classList.add('show');
-}
-function allFriendsVisited(){
-  const ids=USERS.mina_1999_official.friends;
-  return ids.every(id=>localStorage.getItem('visited_'+id)==='1');
-}
-
-// 朋友頁面被打開時留下探索紀錄；全部看過後解鎖最後一層
-const originalSwitchProfile=switchProfile;
-switchProfile=function(handle){
-  originalSwitchProfile(handle);
-  if(handle!=='mina_1999_official'){
-    localStorage.setItem('visited_'+handle,'1');
-  }
-  if(handle==='mina_1999_official' && allFriendsVisited()){
-    setTimeout(()=>showFinalLogin(),350);
-  }
-};
-function showFinalLogin(){
-  const el=document.getElementById('loginScreen');
-  if(el) el.classList.add('show');
-}
-function closeFinalLogin(){
-  document.getElementById('loginScreen')?.classList.remove('show');
-}
-function fakeLogin(){
-  const u=document.getElementById('loginUser').value.trim() || 'anonymous';
-  closeFinalLogin();
-  showToast(`歡迎，@${u}。你現在也是「觀看」的一部分。`);
-}
-
-// 初始化渲染
-switchProfile("mina_1999_official");
-if(localStorage.getItem('mina_email_unlocked')==='1'){
-  setTimeout(()=>document.getElementById('unlockBanner')?.classList.add('show'),100);
-}
-
+// 初始化頁面
+window.addEventListener("DOMContentLoaded", () => {
+  renderProfile();
+  renderPosts();
+});
 </script>
 </body>
 </html>
